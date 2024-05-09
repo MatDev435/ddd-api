@@ -1,6 +1,6 @@
-import { AnswerQuestionUseCase } from './answer-question'
-import { Answer } from '../../enterprise/entities/answer'
-import { AnswerQuestionRepository } from '../repositories/answers-repository'
+import { AnswerQuestionRepository } from '../forum/application/repositories/answers-repository'
+import { Answer } from '@/domain/forum/enterprise/entities/answer'
+import { AnswerQuestionUseCase } from '../forum/application/use-cases/answer-question'
 
 const fakeAnswerQuestionRepository: AnswerQuestionRepository = {
   // eslint-disable-next-line
