@@ -3,6 +3,7 @@ import { Answer } from '../entities/answer'
 import { AnswerQuestionRepository } from '../repositories/answer-question'
 
 const fakeAnswerQuestionRepository: AnswerQuestionRepository = {
+  // eslint-disable-next-line
   create: async (answer: Answer) => {},
 }
 
