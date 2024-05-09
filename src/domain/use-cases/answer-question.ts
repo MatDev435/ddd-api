@@ -1,3 +1,4 @@
+import { UniqueEntityID } from '../../core/entities/unique-entity-id'
 import { Answer } from '../entities/answer'
 import { AnswerQuestionRepository } from '../repositories/answer-question'
 
@@ -15,9 +16,9 @@ export class AnswerQuestionUseCase {
     questionId,
     content,
   }: AnswerQuestionUseCaseRequest) {
-    const answer = new Answer({
-      questionId,
-      authorId: instructorId,
+    const answer = Answer.create({
+      questionId: new UniqueEntityID(questionId),
+      authorId: new UniqueEntityID(instructorId),
       content,
     })
 
