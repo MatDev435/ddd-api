@@ -29,7 +29,10 @@ describe('Edit Question By Slug Use Case', () => {
       content: 'New content',
     })
 
-    expect(question.title).toEqual(newQuestion.title)
+    expect(question).toMatchObject({
+      title: 'New title',
+      content: 'New content',
+    })
   })
 
   it('should not be able to edit an question from another author', async () => {
