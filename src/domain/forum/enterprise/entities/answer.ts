@@ -3,7 +3,7 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { Optional } from '@/core/types/optional'
 import dayjs from 'dayjs'
 
-interface AnswerProps {
+export interface AnswerProps {
   questionId: UniqueEntityID
   authorId: UniqueEntityID
   content: string
