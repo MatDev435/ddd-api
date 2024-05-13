@@ -66,6 +66,10 @@ export class Question extends Entity<QuestionProps> {
     this.touch()
   }
 
+  set bestAnswerId(answerId: UniqueEntityID) {
+    this.props.bestAnswerId = answerId
+  }
+
   static create(
     props: Optional<QuestionProps, 'createdAt' | 'slug'>,
     id?: UniqueEntityID,
