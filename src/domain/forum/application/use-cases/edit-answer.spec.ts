@@ -2,6 +2,7 @@ import { InMemoryAnswersRepository } from 'tests/repositories/in-memory-answers-
 import { makeAnswer } from 'tests/factories/make-answer'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { EditAnswerUseCase } from './edit-answer'
+import { NotAllowedError } from './errors/not-allowed-error'
 
 let inMemoryAnswersRepository: InMemoryAnswersRepository
 let sut: EditAnswerUseCase
@@ -22,15 +23,15 @@ describe('Edit Answer By Slug Use Case', () => {
 
     await inMemoryAnswersRepository.create(newAnswer)
 
-    const { answer } = await sut.execute({
+    await sut.execute({
       authorId: 'author-01',
       answerId: 'answer-01',
       content: 'New content',
     })
 
-    expect(answer).toMatchObject({
-      content: 'New content',
-    })
+    expect(inMemoryAnswersRepository.items).toEqual([
+      expect.objectContaining({ content: 'New content' }),
+    ])
   })
 
   it('should not be able to edit an answer from another author', async () => {
@@ -43,12 +44,13 @@ describe('Edit Answer By Slug Use Case', () => {
 
     await inMemoryAnswersRepository.create(newAnswer)
 
-    await expect(() =>
-      sut.execute({
-        authorId: 'author-02',
-        answerId: 'answer-01',
-        content: 'New content',
-      }),
-    ).rejects.toBeInstanceOf(Error)
+    const result = await sut.execute({
+      authorId: 'author-02',
+      answerId: 'answer-01',
+      content: 'New content',
+    })
+
+    expect(result.isLeft()).toBe(true)
+    expect(result.value).toBeInstanceOf(NotAllowedError)
   })
 })
