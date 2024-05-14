@@ -3,14 +3,22 @@ import { makeQuestion } from 'tests/factories/make-question'
 import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { EditQuestionUseCase } from './edit-question'
 import { NotAllowedError } from './errors/not-allowed-error'
+import { InMemoryQuestionAttachmentsRepository } from 'tests/repositories/in-memory-question-attachments-repository'
+import { makeQuestionAttachment } from 'tests/factories/make-question-attachment'
 
 let inMemoryQuestionsRepository: InMemoryQuestionsRepository
+let inMemoryQuestionAttachmentsRepository: InMemoryQuestionAttachmentsRepository
 let sut: EditQuestionUseCase
 
 describe('Edit Question By Slug Use Case', () => {
   beforeEach(() => {
     inMemoryQuestionsRepository = new InMemoryQuestionsRepository()
-    sut = new EditQuestionUseCase(inMemoryQuestionsRepository)
+    inMemoryQuestionAttachmentsRepository =
+      new InMemoryQuestionAttachmentsRepository()
+    sut = new EditQuestionUseCase(
+      inMemoryQuestionsRepository,
+      inMemoryQuestionAttachmentsRepository,
+    )
   })
 
   it('should be able to edit an question', async () => {
@@ -23,15 +31,37 @@ describe('Edit Question By Slug Use Case', () => {
 
     await inMemoryQuestionsRepository.create(newQuestion)
 
+    inMemoryQuestionAttachmentsRepository.items.push(
+      makeQuestionAttachment({
+        questionId: newQuestion.id,
+        attachmentId: new UniqueEntityID('1'),
+      }),
+
+      makeQuestionAttachment({
+        questionId: newQuestion.id,
+        attachmentId: new UniqueEntityID('2'),
+      }),
+    )
+
     await sut.execute({
       authorId: 'author-01',
       questionId: 'question-01',
       title: 'New title',
       content: 'New content',
+      attachmentsIds: ['1', '3'],
     })
 
     expect(inMemoryQuestionsRepository.items).toEqual([
       expect.objectContaining({ title: 'New title', content: 'New content' }),
+    ])
+    expect(
+      inMemoryQuestionsRepository.items[0].attachments.currentItems,
+    ).toHaveLength(2)
+    expect(
+      inMemoryQuestionsRepository.items[0].attachments.currentItems,
+    ).toEqual([
+      expect.objectContaining({ attachmentId: new UniqueEntityID('1') }),
+      expect.objectContaining({ attachmentId: new UniqueEntityID('3') }),
     ])
   })
 
@@ -50,6 +80,7 @@ describe('Edit Question By Slug Use Case', () => {
       questionId: 'question-01',
       title: 'New title',
       content: 'New content',
+      attachmentsIds: [],
     })
 
     expect(result.isLeft()).toBe(true)

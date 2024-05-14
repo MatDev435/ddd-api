@@ -16,7 +16,7 @@ describe('Create Question Use Case', () => {
       authorId: '1',
       title: 'New question',
       content: 'New question content',
-      attachments: ['1', '2'],
+      attachmentsIds: ['1', '2'],
     })
 
     expect(result.isRight()).toBe(true)
