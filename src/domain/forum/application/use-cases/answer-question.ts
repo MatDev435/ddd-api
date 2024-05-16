@@ -1,31 +1,44 @@
 import { Either, right } from '@/core/either'
 import { UniqueEntityID } from '../../../../core/entities/unique-entity-id'
 import { Answer } from '../../enterprise/entities/answer'
-import { AnswerQuestionRepository } from '../repositories/answers-repository'
+import { AnswersRepository } from '../repositories/answers-repository'
+import { AnswerAttachment } from '../../enterprise/entities/answer-attachment'
+import { AnswerAttachmentList } from '../../enterprise/entities/answer-attachment-list'
 
-interface AnswerQuestionUseCaseRequest {
+interface AnswerAnswerUseCaseRequest {
   instructorId: string
   questionId: string
   content: string
+  attachmentsIds: string[]
 }
 
-type AnswerQuestionUseCaseResponse = Either<null, { answer: Answer }>
+type AnswerAnswerUseCaseResponse = Either<null, { answer: Answer }>
 
 export class AnswerQuestionUseCase {
-  constructor(private answerQuestionRepository: AnswerQuestionRepository) {}
+  constructor(private answersRepository: AnswersRepository) {}
 
   async execute({
     instructorId,
     questionId,
     content,
-  }: AnswerQuestionUseCaseRequest): Promise<AnswerQuestionUseCaseResponse> {
+    attachmentsIds,
+  }: AnswerAnswerUseCaseRequest): Promise<AnswerAnswerUseCaseResponse> {
     const answer = Answer.create({
       questionId: new UniqueEntityID(questionId),
       authorId: new UniqueEntityID(instructorId),
       content,
     })
 
-    await this.answerQuestionRepository.create(answer)
+    const answerAttachments = attachmentsIds.map((attachmentId) => {
+      return AnswerAttachment.create({
+        attachmentId: new UniqueEntityID(attachmentId),
+        answerId: answer.id,
+      })
+    })
+
+    answer.attachments = new AnswerAttachmentList(answerAttachments)
+
+    await this.answersRepository.create(answer)
 
     return right({ answer })
   }
