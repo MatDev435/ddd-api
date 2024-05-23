@@ -4,6 +4,7 @@ import { UniqueEntityID } from '@/core/entities/unique-entity-id'
 import { Optional } from '@/core/types/optional'
 import dayjs from 'dayjs'
 import { QuestionAttachmentList } from './question-attachment-list'
+import { QuestionBestAnswerChosenEvent } from '../events/question-best-answer-chosen-event'
 
 export interface QuestionProps {
   authorId: UniqueEntityID
@@ -73,7 +74,18 @@ export class Question extends AggregateRoot<QuestionProps> {
   }
 
   set bestAnswerId(answerId: UniqueEntityID) {
+    if (answerId === undefined) return
+
+    if (
+      this.props.bestAnswerId === undefined ||
+      !this.props.bestAnswerId.equals(answerId)
+    ) {
+      this.addDomainEvent(new QuestionBestAnswerChosenEvent(this, answerId))
+    }
+
     this.props.bestAnswerId = answerId
+
+    this.touch()
   }
 
   set attachments(attachments: QuestionAttachmentList) {
